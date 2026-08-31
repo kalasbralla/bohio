@@ -72,11 +72,6 @@
                     android:id="@+id/rama_btn"
                     android:text="@string/rama_url"
                     style="@style/BTN2" />
-
-                <Button
-                    android:id="@+id/discord_btn"
-                    android:text="@string/btn_join_discord"
-                    style="@style/BTN2" />
             </LinearLayout>
 
         </LinearLayout>

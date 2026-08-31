@@ -117,15 +117,6 @@ abstract class BohioAboutActivity : BohioActivity() {
             startActivity(intent)
         }
 
-        val discordButton = findViewById<View>(R.id.discord_btn)
-        discordButton.setOnClickListener {
-            val intent = Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse(getString(R.string.discord_url))
-            )
-            startActivity(intent)
-        }
-
         val version = packageManager.getPackageInfo(packageName, 0).versionCode
         val nameView = findViewById<TextView>(R.id.name_version)
         nameView.text = getString(R.string.name_version, getString(appNameRes), version)

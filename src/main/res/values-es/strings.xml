@@ -11,7 +11,6 @@
     <string name="btn_clear">Borrar</string>
     <string name="btn_font_custom_pick">Elegir un archivo de fuente</string>
     <string name="btn_go_back">Volver</string>
-    <string name="btn_join_discord">Unirse a Discord</string>
     <string name="btn_reset">Restablecer</string>
     <string name="btn_save">Guardar</string>
     <string name="btn_theme_apply_custom">Aplicar tema personalizado</string>
@@ -40,10 +39,12 @@
     <string name="filepicker_font_custom_none">Ninguna fuente seleccionada</string>
     <string name="h2_color_picker">Elegir un color</string>
     <string name="h3_app">Aplicación</string>
+    <string name="h3_apps_by_rama">Aplicaciones por Rama</string>
     <string name="h3_contributors">Colaboradores</string>
     <string name="h3_fonts">Fuentes</string>
     <string name="h3_icons">Iconos</string>
     <string name="h3_language">Idioma</string>
+    <string name="h3_links">Links de la Comunidad</string>
     <string name="h3_system">Sistema</string>
     <string name="h3_themes">Temas</string>
     <string name="label_zoom">Zoom</string>
