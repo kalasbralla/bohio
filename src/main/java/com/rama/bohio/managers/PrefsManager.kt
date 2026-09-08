@@ -70,7 +70,13 @@ abstract class PrefsManager protected constructor(context: Context) {
         prefs.edit().putString(key, value).apply()
 
     open fun initPrefs(sync: Boolean = false) {
-        if (prefs.contains(PrefKeys.APP_LANGUAGE)) return
+        if (prefs.contains(PrefKeys.APP_LANGUAGE)) {
+            // Defaults are already written, but migrations must still run: an install
+            // upgraded from an older version reaches this branch every launch, and
+            // anything gated behind the early return would never execute.
+            migrateLegacyPrefs(sync)
+            return
+        }
 
         val editor = prefs.edit()
             .putString(PrefKeys.FONT_STYLE, PrefFontStyle.JERSEY_25)
@@ -89,9 +95,19 @@ abstract class PrefsManager protected constructor(context: Context) {
         applyAppDefaults(editor)
 
         if (sync) editor.commit() else editor.apply()
+
+        migrateLegacyPrefs(sync)
     }
 
     protected open fun applyAppDefaults(editor: SharedPreferences.Editor) {
+    }
+
+    /** Runs on every initPrefs call. Implementations must be idempotent. */
+    protected open fun migrateLegacyPrefs(sync: Boolean) {
+    }
+
+    /** Runs after an import has been committed, with the imported values in place. */
+    protected open fun onAfterImport() {
     }
 
     // Export/Import/Clear
@@ -158,6 +174,7 @@ abstract class PrefsManager protected constructor(context: Context) {
                 }
             }
             editor.commit()
+            onAfterImport()
             true
         } catch (e: Exception) {
             e.printStackTrace()
