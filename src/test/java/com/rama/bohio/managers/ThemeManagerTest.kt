@@ -1,11 +1,17 @@
 package com.rama.bohio.managers
 
 import android.content.Context
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.rama.bohio.objects.PrefKeys
 import com.rama.bohio.objects.PrefTheme
 import com.rama.bohio.objects.Themes
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import io.mockk.verify
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,6 +27,11 @@ class ThemeManagerTest {
         context.getSharedPreferences("settings", Context.MODE_PRIVATE)
             .edit().clear().commit()
         PrefsManager.register(TestPrefsManager(context))
+    }
+
+    @After
+    fun tearDown() {
+        unmockkObject(ThemeManager)
     }
 
     @Test
@@ -88,5 +99,17 @@ class ThemeManagerTest {
         )
 
         assertThat(Themes.builtIn.keys).containsExactlyElementsIn(nonCustomThemeKeys)
+    }
+
+    @Test
+    fun `applyTheme builds the color map once per pass regardless of tree size`() {
+        mockkObject(ThemeManager)
+        val root = LinearLayout(context).apply {
+            repeat(25) { addView(TextView(context)) }
+        }
+
+        ThemeManager.applyTheme(context, root)
+
+        verify(exactly = 1) { ThemeManager.createColorMap(any(), any()) }
     }
 }

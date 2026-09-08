@@ -72,27 +72,30 @@ object ThemeManager {
         val prefs = PrefsManager.getInstance(context)
         val palette = paletteFor(prefs.getTheme(), context)
         val typeface = FontManager.getTypeface(context, prefs.getFontStyle())
-        applyRecursively(context, root, palette, typeface)
+        // Built once per pass: it allocates every slot of every palette plus a dozen
+        // resource lookups, and applyToView asks for it up to three times per view.
+        val colorMap = createColorMap(context, palette)
+        applyRecursively(root, palette, typeface, colorMap)
     }
 
     private fun applyRecursively(
-        context: Context,
         view: View,
         palette: Themes.Palette,
-        typeface: android.graphics.Typeface?
+        typeface: android.graphics.Typeface?,
+        colorMap: Map<Int, Int>
     ) {
-        applyToView(context, view, palette, typeface)
+        applyToView(view, palette, typeface, colorMap)
         if (view is ViewGroup) {
             for (i in 0 until view.childCount)
-                applyRecursively(context, view.getChildAt(i), palette, typeface)
+                applyRecursively(view.getChildAt(i), palette, typeface, colorMap)
         }
     }
 
     private fun applyToView(
-        context: Context,
         view: View,
         palette: Themes.Palette,
-        typeface: android.graphics.Typeface?
+        typeface: android.graphics.Typeface?,
+        colorMap: Map<Int, Int>
     ) {
         if (view is TextView) {
             typeface?.let { view.typeface = it }
@@ -109,7 +112,7 @@ object ThemeManager {
                 }
 
                 else -> {
-                    val mapped = mapColor(context, view.currentTextColor, palette)
+                    val mapped = colorMap[view.currentTextColor]
                     if (mapped != null) view.setTextColor(mapped)
                 }
             }
@@ -118,19 +121,19 @@ object ThemeManager {
         if (view is ImageView) {
             val tint = view.imageTintList?.defaultColor
             if (tint != null) {
-                val mapped = mapColor(context, tint, palette) ?: palette.icon
+                val mapped = colorMap[tint] ?: palette.icon
                 view.imageTintList = ColorStateList.valueOf(mapped)
             }
         }
 
         val currentColor = resolveDrawableColor(view.background ?: return) ?: return
-        val mapped = mapColor(context, currentColor, palette) ?: return
+        val mapped = colorMap[currentColor] ?: return
         view.setBackgroundColor(mapped)
     }
 
     private val builtInThemes = Themes.builtIn.values.toList()
 
-    private fun createColorMap(context: Context, target: Themes.Palette): Map<Int, Int> {
+    internal fun createColorMap(context: Context, target: Themes.Palette): Map<Int, Int> {
         val custom = buildCustomPalette(context)
         val res = context.resources
         val palettes = builtInThemes + custom
@@ -194,9 +197,6 @@ object ThemeManager {
             put(res.getColor(R.color.suggestion), target.suggestion)
         }
     }
-
-    private fun mapColor(context: Context, color: Int, palette: Themes.Palette): Int? =
-        createColorMap(context, palette)[color]
 
     private fun resolveDrawableColor(drawable: android.graphics.drawable.Drawable): Int? =
         (drawable as? ColorDrawable)?.color
