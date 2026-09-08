@@ -106,8 +106,12 @@ abstract class PrefsManager protected constructor(context: Context) {
     protected open fun migrateLegacyPrefs(sync: Boolean) {
     }
 
-    /** Runs after an import has been committed, with the imported values in place. */
-    protected open fun onAfterImport() {
+    /**
+     * Runs after an import has been committed, with the imported values in place.
+     * [importedKeys] is exactly what the backup contained; anything absent from it was
+     * written by the `clearAllPrefs()` that preceded the import, not by the user's data.
+     */
+    protected open fun onAfterImport(importedKeys: Set<String>) {
     }
 
     // Export/Import/Clear
@@ -116,9 +120,6 @@ abstract class PrefsManager protected constructor(context: Context) {
         val json = JSONObject()
 
         val sortedEntries = prefs.all.entries
-            // An absolute path from another device; FontManager falls back silently
-            // when it does not resolve, which reads as the setting being ignored.
-            .filterNot { it.key == PrefKeys.FONT_CUSTOM_PATH }
             .sortedBy { it.key }
 
         sortedEntries.forEach { (key, value) ->
@@ -155,7 +156,9 @@ abstract class PrefsManager protected constructor(context: Context) {
             clearAllPrefs()
 
             val editor = prefs.edit()
+            val importedKeys = mutableSetOf<String>()
             json.keys().forEach { key ->
+                importedKeys.add(key)
                 when (val value = json.get(key)) {
                     is Boolean -> editor.putBoolean(key, value)
                     is Int -> {
@@ -177,7 +180,7 @@ abstract class PrefsManager protected constructor(context: Context) {
                 }
             }
             editor.commit()
-            onAfterImport()
+            onAfterImport(importedKeys)
             true
         } catch (e: Exception) {
             e.printStackTrace()
