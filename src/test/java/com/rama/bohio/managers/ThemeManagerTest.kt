@@ -115,6 +115,19 @@ class ThemeManagerTest {
     }
 
     @Test
+    fun `a hint colour is remapped like any other text colour`() {
+        PrefsManager.getInstance(context).setTheme(PrefTheme.RAMA)
+        val view = TextView(context)
+        view.setTextColor(Themes.MAKO.foreground)
+        view.setHintTextColor(Themes.MAKO.foreground)
+
+        ThemeManager.applyTheme(context, view)
+
+        assertThat(view.hintTextColors.defaultColor).isEqualTo(view.currentTextColor)
+        assertThat(view.hintTextColors.defaultColor).isNotEqualTo(Themes.MAKO.foreground)
+    }
+
+    @Test
     fun `switching back to the default font clears a custom typeface`() {
         val view = android.widget.TextView(context)
         view.typeface = android.graphics.Typeface.MONOSPACE

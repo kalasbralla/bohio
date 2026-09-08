@@ -114,6 +114,14 @@ object ThemeManager {
                 else -> {
                     val mapped = colorMap[view.currentTextColor]
                     if (mapped != null) view.setTextColor(mapped)
+
+                    // A hint is a separate colour on the same view; without this the
+                    // search field's placeholder keeps its design-time @color/disabled.
+                    val hint = view.hintTextColors?.defaultColor
+                    if (hint != null) {
+                        val mappedHint = colorMap[hint]
+                        if (mappedHint != null) view.setHintTextColor(mappedHint)
+                    }
                 }
             }
         }
