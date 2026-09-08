@@ -21,20 +21,23 @@ object FontManager {
     }
 
     fun getTypeface(context: Context, style: String): Typeface? {
-        if (style == PrefFontStyle.DEFAULT) return null
+        // Returning null here means ThemeManager's `typeface?.let` skips the assignment,
+        // so a view keeps whatever the previous pass gave it and switching back to the
+        // default appears to do nothing until the process restarts.
+        if (style == PrefFontStyle.DEFAULT) return Typeface.DEFAULT
 
         // Custom font: always reload from path (don't cache by style key alone)
         if (style == PrefFontStyle.CUSTOM) {
             val path = PrefsManager.getInstance(context).getCustomFontPath()
-            if (path.isBlank()) return null
+            if (path.isBlank()) return Typeface.DEFAULT
             val cacheKey = "custom:$path"
-            if (cache.containsKey(cacheKey)) return cache[cacheKey]
+            if (cache.containsKey(cacheKey)) return cache[cacheKey] ?: Typeface.DEFAULT
             val tf = runCatching { Typeface.createFromFile(File(path)) }.getOrNull()
             cache[cacheKey] = tf
-            return tf
+            return tf ?: Typeface.DEFAULT
         }
 
-        if (cache.containsKey(style)) return cache[style]
+        if (cache.containsKey(style)) return cache[style] ?: Typeface.DEFAULT
 
         val tf = when (style) {
             PrefFontStyle.JERSEY_25 ->
@@ -43,7 +46,7 @@ object FontManager {
             else -> null
         }
         cache[style] = tf
-        return tf
+        return tf ?: Typeface.DEFAULT
     }
 
     // Call this after saving a new custom font so the old cached entry is evicted.

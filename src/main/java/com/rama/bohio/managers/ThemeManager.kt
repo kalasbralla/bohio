@@ -98,7 +98,7 @@ object ThemeManager {
         colorMap: Map<Int, Int>
     ) {
         if (view is TextView) {
-            typeface?.let { view.typeface = it }
+            view.typeface = typeface ?: android.graphics.Typeface.DEFAULT
             when (view) {
                 is RadioButton, is CheckBox -> {
                     view.setTextColor(palette.foreground)

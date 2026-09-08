@@ -5,6 +5,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.rama.bohio.objects.PrefFontStyle
 import com.rama.bohio.objects.PrefKeys
 import com.rama.bohio.objects.PrefTheme
 import com.rama.bohio.objects.Themes
@@ -111,5 +112,16 @@ class ThemeManagerTest {
         ThemeManager.applyTheme(context, root)
 
         verify(exactly = 1) { ThemeManager.createColorMap(any(), any()) }
+    }
+
+    @Test
+    fun `switching back to the default font clears a custom typeface`() {
+        val view = android.widget.TextView(context)
+        view.typeface = android.graphics.Typeface.MONOSPACE
+
+        PrefsManager.getInstance(context).setFontStyle(PrefFontStyle.DEFAULT)
+        ThemeManager.applyTheme(context, view)
+
+        assertThat(view.typeface).isEqualTo(android.graphics.Typeface.DEFAULT)
     }
 }
