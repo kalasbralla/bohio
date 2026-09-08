@@ -116,6 +116,9 @@ abstract class PrefsManager protected constructor(context: Context) {
         val json = JSONObject()
 
         val sortedEntries = prefs.all.entries
+            // An absolute path from another device; FontManager falls back silently
+            // when it does not resolve, which reads as the setting being ignored.
+            .filterNot { it.key == PrefKeys.FONT_CUSTOM_PATH }
             .sortedBy { it.key }
 
         sortedEntries.forEach { (key, value) ->
