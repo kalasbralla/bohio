@@ -228,6 +228,14 @@ abstract class PrefsManager protected constructor(context: Context) {
             instance = prefs
         }
 
+        /**
+         * Test seam. Robolectric gives each test a fresh Application, so an instance
+         * left registered from the previous test is bound to a dead context.
+         */
+        fun resetForTest() {
+            instance = null
+        }
+
         fun getInstance(context: Context): PrefsManager =
             instance ?: error(
                 "PrefsManager.register() has not been called. " +
